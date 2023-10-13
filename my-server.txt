@@ -1,0 +1,140 @@
+password: ssk public key
+
+hostname: ubuntu-s-1vcpu-1gb-fra1-01
+
+ip: 164.92.142.110
+
+------------------------
+
+#Add user
+
+adduser sammy
+password: 34678trbFDH
+
+usermod -aG sudo sammy
+su sammy
+
+------------------------
+
+#Installing the Packages from the Ubuntu Repositories
+
+sudo apt update
+sudo apt install python3-pip python3-dev libpq-dev postgresql postgresql-contrib nginx curl
+
+------------------------
+
+#Creating the PostgreSQL Database and User
+
+sudo -u postgres psql
+
+CREATE DATABASE djangodb;
+
+CREATE USER djangouser WITH PASSWORD 'w8476crbxi736rx3o8rxfzd67gew76fr';
+
+ALTER ROLE djangouser SET client_encoding TO 'utf8';
+ALTER ROLE djangouser SET default_transaction_isolation TO 'read committed';
+ALTER ROLE djangouser SET timezone TO 'utc';
+
+GRANT ALL PRIVILEGES ON DATABASE djangodb TO djangouser;
+
+\q
+
+------------------------
+
+# Git clone
+
+cd
+
+cd /home/sammy
+
+git clone https://github.com/kuprianovaoksana/skidki.git
+
+cd skidki
+
+git checkout future-scrapy-project
+
+------------------------
+
+#Creating a Python Virtual Environment for your Project
+
+sudo -H pip3 install --upgrade pip
+
+sudo -H pip3 install virtualenv
+
+virtualenv venv
+
+source venv/bin/activate
+
+------------------------
+
+#Setup requirements
+
+pip install -r requirements.txt
+
+pip install gunicorn
+
+pip install psycopg2-binary
+
+cd /backend
+
+python manage.py collectstatic
+
+deactivate
+
+------------------------
+
+#Change settings
+
+sudo vim settings.py
+
+------------------------
+
+#Creating systemd Socket and Service Files for Gunicorn
+
+sudo vim /etc/systemd/system/gunicorn.socket
+esc :wq enter
+
+sudo vim /etc/systemd/system/gunicorn.service
+esc :wq enter
+
+sudo systemctl enable gunicorn.socket
+sudo systemctl start gunicorn.socket
+sudo systemctl status gunicorn.socket
+curl --unix-socket /run/gunicorn.sock localhost
+file /run/gunicorn.sock
+sudo systemctl status gunicorn
+
+------------------------
+
+#Configure Nginx to Proxy Pass to Gunicorn
+
+sudo nano /etc/nginx/sites-available/backend
+sudo ln -s /etc/nginx/sites-available/backend /etc/nginx/sites-enabled
+sudo nginx -t
+sudo systemctl restart nginx
+
+------------------------
+
+#If you change file
+
+python manage.py collectstatic
+
+sudo service gunicorn restart
+
+------------------------
+
+~/skidki/backend/manage.py makemigrations
+
+~/skidki/backend/manage.py migrate
+
+~/skidki/backend/manage.py createsuperuser
+
+email: rootbackend@gmail.com
+
+password: 38476tcrxb5
+
+~/skidki/backend/manage.py collectstatic
+
+~/skidki/backend/manage.py runspider
+
+---------------------
